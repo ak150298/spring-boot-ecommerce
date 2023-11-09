@@ -1,12 +1,10 @@
 package com.springboot.ecommerce.config;
 
-import com.springboot.ecommerce.entity.Country;
-import com.springboot.ecommerce.entity.Product;
-import com.springboot.ecommerce.entity.ProductCategory;
-import com.springboot.ecommerce.entity.State;
+import com.springboot.ecommerce.entity.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
@@ -20,6 +18,9 @@ import java.util.Set;
 @Configuration
 public class MyDataRestConfig implements RepositoryRestConfigurer {
 
+    @Value("${allowed.origins}")
+    private String[] theAllowedOrigins;
+
     private EntityManager entityManager;
 
     @Autowired
@@ -29,18 +30,27 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
 
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config, CorsRegistry cors) {
-        HttpMethod[] theUnsupportedActions = {HttpMethod.POST,HttpMethod.PUT,HttpMethod.DELETE};
-        // disable http methods for Product : Post, Put , delete
+        HttpMethod[] theUnsupportedActions = {HttpMethod.POST,HttpMethod.PUT,
+                                              HttpMethod.DELETE,HttpMethod.PATCH};
+        // disable http methods for Product : Post, Put , delete,Patch
         disableHttpMethods(config, theUnsupportedActions,Product.class);
-        // disable http methods for ProductCategory : Post, Put , delete
+        // disable http methods for ProductCategory : Post, Put , delete,Patch
         disableHttpMethods(config, theUnsupportedActions,ProductCategory.class);
-        // disable http methods for Country : Post, Put , delete
+        // disable http methods for Country : Post, Put , delete,Patch
         disableHttpMethods(config, theUnsupportedActions, Country.class);
-        // disable http methods for State : Post, Put , delete
+        // disable http methods for State : Post, Put , delete,Patch
         disableHttpMethods(config, theUnsupportedActions, State.class);
+
+        // disable http methods for Order : Post, Put , delete,Patch
+        disableHttpMethods(config, theUnsupportedActions, Order.class);
+
+
 
         // call an internal helper method
         exposeIds(config);
+
+        //configure cors mapping
+        cors.addMapping(config.getBasePath() + "/**").allowedOrigins(theAllowedOrigins);
 
     }
 
